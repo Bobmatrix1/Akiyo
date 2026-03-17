@@ -1,20 +1,21 @@
-
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { initializeFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage"; 
+import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBUFqWT3P9o_lKTuCVkxLxdyRdm8PHDTrI",
-  authDomain: "quick-mart-7c9db.firebaseapp.com",
-  projectId: "quick-mart-7c9db",
-  storageBucket: "quick-mart-7c9db.firebasestorage.app",
-  messagingSenderId: "1060780981716",
-  appId: "1:1060780981716:web:7e8a590e8d9d771cf22a41",
-  measurementId: "G-QQL4NQSH7X"
+  apiKey: "AIzaSyDAP2WFNoxqQrqQKRd6X5MKbxKjBE3Jwms",
+  authDomain: "akiyo-780ff.firebaseapp.com",
+  projectId: "akiyo-780ff",
+  storageBucket: "akiyo-780ff.firebasestorage.app",
+  messagingSenderId: "445041384311",
+  appId: "1:445041384311:web:28a92609e9f2d7c6ba5f72",
+  measurementId: "G-2PZZ331Q8W"
 };
 
 const app = initializeApp(firebaseConfig);
+export const analytics = getAnalytics(app);
 export const auth = getAuth(app);
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
