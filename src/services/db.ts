@@ -138,6 +138,39 @@ export const deleteCategory = async (id: string): Promise<void> => {
     await deleteDoc(doc(db, "categories", id));
 };
 
+// --- Banners ---
+
+export interface Banner {
+    id: string;
+    title: string;
+    subtitle: string;
+    image: string;
+    cta: string;
+    active: boolean;
+    order: number;
+}
+
+export const getBanners = async (): Promise<Banner[]> => {
+    const bannersRef = collection(db, "banners");
+    const q = query(bannersRef, orderBy("order", "asc"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Banner));
+};
+
+export const createBanner = async (banner: Omit<Banner, "id">): Promise<string> => {
+    const docRef = await addDoc(collection(db, "banners"), banner);
+    return docRef.id;
+};
+
+export const updateBanner = async (id: string, updates: Partial<Banner>): Promise<void> => {
+    const docRef = doc(db, "banners", id);
+    await updateDoc(docRef, updates);
+};
+
+export const deleteBanner = async (id: string): Promise<void> => {
+    await deleteDoc(doc(db, "banners", id));
+};
+
 // --- Settings ---
 
 export const getStoreSettings = async (): Promise<any> => {

@@ -6,7 +6,7 @@ import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
 import { Star, ChevronRight, Loader2, ShoppingBag, Facebook, Twitter, Instagram, Mail, Phone, MapPin } from 'lucide-react';
 import { type Product } from '../data/mock-data';
-import { getProducts, getCategories } from '../../services/db';
+import { getProducts, getCategories, getBanners, type Banner, getStoreSettings } from '../../services/db';
 import type { Page } from '../App';
 import { useState, useEffect } from 'react';
 
@@ -22,6 +22,8 @@ export function Home({ onNavigate, onAddToCart, cartItemCount, searchQuery, acti
   const [currentSlide, setCurrentSlide] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
   const [dbCategories, setDbCategories] = useState<any[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const currentYear = new Date().getFullYear();
@@ -29,12 +31,16 @@ export function Home({ onNavigate, onAddToCart, cartItemCount, searchQuery, acti
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsData, categoriesData] = await Promise.all([
+        const [productsData, categoriesData, bannersData, settingsData] = await Promise.all([
             getProducts(),
-            getCategories()
+            getCategories(),
+            getBanners(),
+            getStoreSettings()
         ]);
         setProducts(productsData);
         setDbCategories(categoriesData);
+        setBanners(bannersData.filter(b => b.active));
+        setSettings(settingsData);
       } catch (error) {
         console.error("Error fetching home data:", error);
       } finally {
@@ -58,28 +64,10 @@ export function Home({ onNavigate, onAddToCart, cartItemCount, searchQuery, acti
     .sort((a, b) => b.id.localeCompare(a.id))
     .slice(0, 10);
 
-  const heroSlides = [
-    {
-      title: 'Summer Sale',
-      subtitle: 'Up to 50% off on selected items',
-      image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800',
-      cta: 'Shop Now',
-    },
-    {
-      title: 'New Arrivals',
-      subtitle: 'Discover the latest trends',
-      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',
-      cta: 'Explore',
-    },
-    {
-      title: 'Free Shipping',
-      subtitle: 'On orders over $50',
-      image: 'https://images.unsplash.com/photo-1607082349566-187342175e2f?w=800',
-      cta: 'Learn More',
-    },
-  ];
+  const heroSlides = banners;
 
   useEffect(() => {
+    if (heroSlides.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
@@ -269,22 +257,24 @@ export function Home({ onNavigate, onAddToCart, cartItemCount, searchQuery, acti
         </section>
 
         {/* Promo Banner */}
-        <section className="p-4">
-          <div className="relative h-40 md:h-48 rounded-lg overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=1200"
-              alt="Promo"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center text-white p-6">
-              <div>
-                <h3 className="text-2xl font-semibold mb-2">Join Our Newsletter</h3>
-                <p className="text-sm mb-4">Get 10% off your first order</p>
-                <Button variant="secondary">Subscribe Now</Button>
+        {settings?.promoBanner?.active && (
+          <section className="p-4">
+            <div className="relative h-40 md:h-48 rounded-lg overflow-hidden">
+              <img
+                src={settings.promoBanner.image || "https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=1200"}
+                alt="Promo"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center text-white p-6">
+                <div>
+                  <h3 className="text-2xl font-semibold mb-2">{settings.promoBanner.title || "Join Our Newsletter"}</h3>
+                  <p className="text-sm mb-4">{settings.promoBanner.subtitle || "Get 10% off your first order"}</p>
+                  <Button variant="secondary">{settings.promoBanner.cta || "Subscribe Now"}</Button>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Footer */}
         <footer className="bg-muted/50 pt-12 pb-24 lg:pb-12 mt-12 border-t">
